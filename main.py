@@ -10,4 +10,6 @@ data = {
 }
 
 output = request_get(url,data)
-print(output)
+maneuvers = output['trip']['legs'][0]['maneuvers']
+for m in maneuvers:
+    print(m['instruction'])
