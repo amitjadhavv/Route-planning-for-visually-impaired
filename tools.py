@@ -9,19 +9,15 @@ def walk_simulator(file_path):
     route_track = xml_dict["gpx"]["trk"]["trkseg"]["trkpt"]
     previous_time = None
     current_time = None
-    intial_time = None
     for point in route_track:
         lat = point["@lat"]
         lon = point["@lon"]
         current_time = datetime.fromisoformat(point["time"][:-1])
-        if previous_time is None:
-            intial_time = current_time
+        if previous_time is None: 
             previous_time = current_time
         sleep_time = current_time - previous_time
         print(sleep_time.total_seconds())
         time.sleep(sleep_time.total_seconds())
          # put thread to sleep to simulate walking on the pedestrian
-        previous_time = current_time
         yield [lat,lon,current_time.strftime("%Y-%m-%d %H:%M:%S")]
-    print("total time elapsed:", current_time-intial_time)
 
