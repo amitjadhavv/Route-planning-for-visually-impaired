@@ -1,8 +1,9 @@
 import xmltodict
 from datetime import datetime
-import time
 from math import radians, sin, cos, sqrt, atan2
 import re
+import time
+from queue import Queue
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -29,36 +30,57 @@ def haversine(lat1, lon1, lat2, lon2):
 
     return distance
 
-
-
-def walk_simulator(file_path):
-    with open('2023-11-13_13_Nov_2023_11_58_22.gpx', 'r') as f:
-        xml_dict = xmltodict.parse(f.read())
-    route_track = xml_dict["gpx"]["trk"]["trkseg"]["trkpt"]
-    previous_time = None
-    current_time = None
-    initialize_time = None
-    for point in route_track:
-        lat = float(point["@lat"])
-        lon = float(point["@lon"])
-        current_time = datetime.fromisoformat(point["time"][:-1])
-        if previous_time is None: 
-            previous_time = current_time
-        if initialize_time is None:
-            initialize_time = current_time
-        sleep_time = current_time - previous_time
-        # put thread to sleep to simulate walking on the pedestrian
-        time.sleep(sleep_time.total_seconds())
-        yield {'lat': lat, 'lon': lon, 'elapsed_time': (current_time-initialize_time).total_seconds()}
-        previous_time = current_time
-
-
 def extract_directions(text):
     pattern = re.compile(r'(right|left|You have arrived at your destination)', re.IGNORECASE)
     matches = pattern.findall(text)
     if not matches:
-        return "go straight"
+        return "stay center/go straight"
     elif matches[0].startswith("You"):
         return matches[0]
     else:
         return "turn " + matches[0]
+
+class Walk_simulator():
+    interval_time: int
+    file_path: str
+    start_time: datetime
+    route_track: Queue
+
+    def __init__(self,file_path,interval_time):
+        self.file_path = file_path
+        self.interval_time = interval_time
+        self.route_track = Queue()
+        with open('2023-11-13_13_Nov_2023_11_58_22.gpx', 'r') as f:
+            xml_dict = xmltodict.parse(f.read())
+        temp_data = xml_dict["gpx"]["trk"]["trkseg"]["trkpt"]
+        for temp in temp_data:
+            self.route_track.put(temp)
+
+    def walking(self):
+        location = self.route_track.get()
+        self.start_time = datetime.fromisoformat(location["time"][:-1])
+        previous_time = self.start_time
+        current_time = self.start_time
+        elapsed_time = (current_time - self.start_time).total_seconds()
+        gps_point_time = datetime.fromisoformat(location["time"][:-1])
+        gps_elapsed_time = gps_point_time - self.start_time
+        while not self.route_track.empty():
+            if elapsed_time + self.interval_time >= gps_elapsed_time.total_seconds():
+                time.sleep(gps_elapsed_time.total_seconds() - elapsed_time)
+                lat = float(location["@lat"])
+                lon = float(location["@lon"])
+                elapsed_time = gps_elapsed_time.total_seconds()
+
+                yield {'lat': lat, 'lon': lon, 'elapsed_time': elapsed_time}
+                location = self.route_track.get()
+                gps_point_time = datetime.fromisoformat(location["time"][:-1])
+                gps_elapsed_time = gps_point_time - self.start_time
+            else:
+                time.sleep(self.interval_time)
+                lat = float(location["@lat"])
+                lon = float(location["@lon"])
+                elapsed_time += self.interval_time
+                yield {'lat': lat, 'lon': lon, 'elapsed_time': elapsed_time}
+
+
+
