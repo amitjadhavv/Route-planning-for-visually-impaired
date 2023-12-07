@@ -1,0 +1,4 @@
+dataclasses_json
+dataclasses
+xmltodict
+moviepy

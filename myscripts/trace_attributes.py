@@ -1,9 +1,11 @@
+import sys
+sys.path.append('..')
 import xmltodict
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from typing import List
-from request import request_post
 from datetime import datetime
+from request import request_post
 import json
 
 @dataclass_json
@@ -42,16 +44,16 @@ class Trace_attributes():
                 start_time = time
             if previous_time is None:
                 previous_time = time
-            shape.append(Coordinate(lat,lon,time = (time - start_time).total_seconds()))
+            shape.append(Coordinate(lat, lon, time=(time - start_time).total_seconds()))
 
         shape[0].type = shape[-1].type = "break"
-        data = Input_data(shape = shape)
+        data = Input_data(shape=shape)
         json_data = data.to_json()
         self.data = json_data
         return json_data
 
-    def request(self):
+    def request1(self):
         url = "https://valhalla1.openstreetmap.de/trace_attributes"
-        response = request_post(url,data=self.data)
-        formatted_data = json.dumps(response,indent=2)
-        return response
+        response = request_post(url, data=self.data)
+        formatted_data = json.dumps(response, indent=2)
+        return formatted_data

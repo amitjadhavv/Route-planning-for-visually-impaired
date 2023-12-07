@@ -6,6 +6,7 @@ import time
 from queue import Queue
 
 
+
 def haversine(lat1, lon1, lat2, lon2):
 
     if lat1 is None or lon1 is None:
@@ -30,15 +31,17 @@ def haversine(lat1, lon1, lat2, lon2):
 
     return distance
 
+
 def extract_directions(text):
     pattern = re.compile(r'(right|left|You have arrived at your destination)', re.IGNORECASE)
     matches = pattern.findall(text)
     if not matches:
-        return "stay center/go straight"
+        return "stay center"
     elif matches[0].startswith("You"):
         return matches[0]
     else:
-        return "turn " + matches[0]
+        return "go " + matches[0]
+
 
 class Walk_simulator():
     interval_time: int
@@ -50,7 +53,7 @@ class Walk_simulator():
         self.file_path = file_path
         self.interval_time = interval_time
         self.route_track = Queue()
-        with open('2023-11-13_13_Nov_2023_11_58_22.gpx', 'r') as f:
+        with open(self.file_path, 'r') as f:
             xml_dict = xmltodict.parse(f.read())
         temp_data = xml_dict["gpx"]["trk"]["trkseg"]["trkpt"]
         for temp in temp_data:
@@ -66,21 +69,23 @@ class Walk_simulator():
         gps_elapsed_time = gps_point_time - self.start_time
         while not self.route_track.empty():
             if elapsed_time + self.interval_time >= gps_elapsed_time.total_seconds():
-                time.sleep(gps_elapsed_time.total_seconds() - elapsed_time)
+                # time.sleep(gps_elapsed_time.total_seconds() - elapsed_time)
                 lat = float(location["@lat"])
                 lon = float(location["@lon"])
                 elapsed_time = gps_elapsed_time.total_seconds()
-
-                yield {'lat': lat, 'lon': lon, 'elapsed_time': elapsed_time}
+                elapasd_time_between_two_coordinate = (gps_point_time - previous_time).total_seconds()
+                yield {'lat': lat, 'lon': lon, 'elapsed_time': elapsed_time, 'elapasd_time_between_two_coordinate': elapasd_time_between_two_coordinate}
                 location = self.route_track.get()
+                previous_time = gps_point_time
                 gps_point_time = datetime.fromisoformat(location["time"][:-1])
                 gps_elapsed_time = gps_point_time - self.start_time
             else:
-                time.sleep(self.interval_time)
+                # time.sleep(self.interval_time)
                 lat = float(location["@lat"])
                 lon = float(location["@lon"])
                 elapsed_time += self.interval_time
-                yield {'lat': lat, 'lon': lon, 'elapsed_time': elapsed_time}
+                elapasd_time_between_two_coordinate = (gps_point_time - previous_time).total_seconds()
+                yield {'lat': lat, 'lon': lon, 'elapsed_time': elapsed_time, 'elapasd_time_between_two_coordinate': elapasd_time_between_two_coordinate}
 
 
 

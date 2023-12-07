@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 from typing import List
 from typing import Dict
+import sys
+sys.path.append("..")
 from request import request_post
 
 @dataclass_json
