@@ -19,7 +19,7 @@ Useful links for this project:
 8. L2MM: Learning to Map Matching with Deep Models for Low-Quality GPS Trajectory Data, https://dl.acm.org/doi/10.1145/3550486
 
 ### To install required libraries:
-for linux:
+#### for linux:
 1. sudo apt-get install imagemagic
 2. pip install -r requirements.txt
 3. sudo apt-get install libmagick++-dev
@@ -28,17 +28,20 @@ for linux:
    or  
    (2)sudo mv policy.xml /etc/ImageMagick-6/policy.xml
 
-for macOS:
+#### for macOS:
 1. brew install imagemagick
 2. pip install -r requirements.txt
 
 
-for windows:
+#### for windows:
 1. install imagemagic. check <https://zulko.github.io/moviepy/install.html>
 2. pip install -r requirements.txt
 
 ### To run the generate_video_walk file:
 python3 generate_video_walk.py files/walking_video.mp4 edited_video.mp4
+
+### Edited Video Link:
+https://faubox.rrze.uni-erlangen.de/download/MkZnZFRlOUpmVEc1bU02eGRTWFZL/edited_video.mp4
 
 ### link to trained weights:
 https://faubox.rrze.uni-erlangen.de/download/MkZnZFRlOUpmVEc1bU02eGRTWFZL/deeplab_model.pth
