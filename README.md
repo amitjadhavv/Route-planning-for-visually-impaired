@@ -39,3 +39,6 @@ for windows:
 
 ### To run the generate_video_walk file:
 python3 generate_video_walk.py files/walking_video.mp4 edited_video.mp4
+
+### link to trained weights:
+https://faubox.rrze.uni-erlangen.de/download/MkZnZFRlOUpmVEc1bU02eGRTWFZL/deeplab_model.pth
