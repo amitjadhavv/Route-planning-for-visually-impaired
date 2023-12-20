@@ -7,39 +7,55 @@ import torchvision.models as models
 import torchvision.models.segmentation as segmentation
 
 
+import torch.nn as nn
+import torch.optim as optim
+
+from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
+
 root = '.'
-image_dir = '/leftImg8bit_trainvaltest/leftImg8bit/train/aachen' 
-mask_dir = '/gtFine_trainvaltest/gtFine/train/aachen'  
+image_dir = '/leftImg8bit_trainvaltest/leftImg8bit/train' 
+mask_dir = 'gtFine_trainvaltest/gtFine/train'  
+
+
+# Transformations (if any)
+transform = transforms.Compose([
+    transforms.Resize((256,256)),
+    transforms.ToTensor(),
+])
+
 class CustomDataset(Dataset):
-    def __init__(self, root, img_dir, mask_dir, transform=None):
+    def __init__(self, root,img_dir, mask_dir, transform=None):
         self.root = root
-        self.img_dir = os.path.join(root, img_dir)
-        self.mask_dir = os.path.join(root, mask_dir)
+        self.img_dir = os.path.join(root,img_dir)
+        self.mask_dir = os.path.join(root,mask_dir)
+        self.city_dir = os.listdir(self.img_dir)
+        
         self.transform = transform
-        self.images = sorted(os.listdir(self.img_dir))
+        self.images = []
+        self.masks = []
+        for city in self.city_dir:
+            city_img = os.path.join(self.img_dir,city)
+            city_mask = os.path.join(self.mask_dir,city)
+            
+            for file in os.listdir(city_img):
+                img_path = os.path.join(city_img,file)
+                mask_path = os.path.join(city_mask,file)
+                self.images.append(img_path)
+                self.masks.append(mask_path)
 
     def __getitem__(self, index):
-        img_path = os.path.join(self.img_dir, self.images[index])
-        mask_path = os.path.join(self.mask_dir, self.images[index].replace('_leftImg8bit.png', '_gtFine_labelIds.png'))
-        
+        img_path = self.images[index]
+        mask_path = self.masks[index].replace('_leftImg8bit.png', '_gtFine_labelIds.png')
         image = Image.open(img_path).convert("RGB")
-        mask = Image.open(mask_path).convert("L")
-
+        mask = Image.open(mask_path).convert("L") 
         if self.transform is not None:
             image = self.transform(image)
             mask = self.transform(mask)
 
-        return {'image': image, 'mask': mask}
+        return {'image':image, 'mask':mask}
 
     def __len__(self):
         return len(self.images)
-
-
-transform = transforms.Compose([
-    transforms.Resize((256,256)),
-    #transforms.Grayscale(num_output_channels=3),
-    transforms.ToTensor(),
-])
 
 
 dataset = CustomDataset(root, image_dir, mask_dir, transform)
@@ -53,12 +69,6 @@ resnet34 = models.resnet34(pretrained=True)
 deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=30)
 
 
-import torch.nn as nn
-import torch.optim as optim
-
-from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
-
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.cuda.empty_cache()
 
@@ -66,7 +76,7 @@ num_classes = 30
 learning_rate = 0.001
 num_epochs = 10
 
-criterion = IoULoss(num_classes = 30).to(device)#nn.CrossEntropyLoss()
+criterion = IoULoss(num_classes = 30).to(device)
 optimizer = optim.Adam(deeplab_model.parameters(), lr=learning_rate)
 
 
