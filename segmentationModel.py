@@ -14,7 +14,7 @@ from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
 
 root = '.'
 image_dir = '/leftImg8bit_trainvaltest/leftImg8bit/train' 
-mask_dir = 'gtFine_trainvaltest/gtFine/train'  
+mask_dir = '/gtFine_trainvaltest/gtFine/train'  
 
 
 # Transformations (if any)
