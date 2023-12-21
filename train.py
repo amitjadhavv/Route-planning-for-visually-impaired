@@ -17,7 +17,6 @@ image_dir = '/leftImg8bit_trainvaltest/leftImg8bit/train'
 mask_dir = '/gtFine_trainvaltest/gtFine/train'  
 
 
-# Transformations (if any)
 transform = transforms.Compose([
     transforms.Resize((256,256)),
     transforms.ToTensor(),

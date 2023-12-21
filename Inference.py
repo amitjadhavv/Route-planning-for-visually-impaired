@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from PIL import Image
 import torch
 import torchvision.models.segmentation as segmentation
+import numpy as np
 
 model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=30)
 
@@ -29,7 +30,7 @@ os.makedirs(output_folder, exist_ok=True)
 
 for image_name in os.listdir(test_images_folder):
     image_path = os.path.join(test_images_folder, image_name)
-    image = preprocess_image(image_path).unsqueeze(0)  # Add batch dimension
+    image = preprocess_image(image_path).unsqueeze(0)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     image = image.to(device)
@@ -47,9 +48,6 @@ for image_name in os.listdir(test_images_folder):
     Image.fromarray((predicted_mask.squeeze().cpu().numpy() * 255).astype('uint8')).save(output_path)
     #Image.fromarray(predicted_mask.transpose(1, 2, 0)).save(output_path)
 
-import os
-from PIL import Image
-import numpy as np
 
 def compute_iou(predicted_mask_path, ground_truth_mask_path):
     predicted_mask = np.array(Image.open(predicted_mask_path))
