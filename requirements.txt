@@ -5,3 +5,4 @@ moviepy
 PIL
 torch
 torchvision
+torchmetrics
