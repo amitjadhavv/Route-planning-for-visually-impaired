@@ -23,7 +23,7 @@ def preprocess_image(image_path):
     return image
 import os
 
-test_images_folder = '/mapillary/Mapillary-Vistas-1000-sidewalks/testing/images'
+test_images_folder = '/mapillary/Mapillary-Vistas-1000-sidewalks/testing/images' # please edit to correct location of the mapilary dataset since we have not uploded the data set
 output_folder = '/masks'
 
 os.makedirs(output_folder, exist_ok=True)
