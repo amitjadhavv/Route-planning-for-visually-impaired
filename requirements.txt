@@ -1,0 +1,8 @@
+dataclasses_json
+dataclasses
+xmltodict
+moviepy
+PIL
+torch
+torchvision
+torchmetrics
