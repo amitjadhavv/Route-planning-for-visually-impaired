@@ -2,7 +2,7 @@ dataclasses_json
 dataclasses
 xmltodict
 moviepy
-PIL
+pillow
 torch
 torchvision
 torchmetrics
