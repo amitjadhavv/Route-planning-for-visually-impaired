@@ -2,9 +2,9 @@ import json
 import tools
 from collections import deque
 import xmltodict
-from myscripts import route
-from myscripts import trace_route
-from myscripts import trace_attributes
+from myroutes import route
+from myroutes import trace_route
+from myroutes import trace_attributes
 
 # method 1 to get route plan
 # start_points = route.Coordinate(lat=49.59586959, lon=11.00270821)

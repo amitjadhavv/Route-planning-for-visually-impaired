@@ -1,0 +1,90 @@
+import os
+import json
+import cv2
+import numpy as np
+from tqdm import tqdm
+
+
+def load_json(json_path):
+    with open(json_path, 'r') as f:
+        data = json.load(f)
+    return data
+
+
+def convert_color_mapping(labels,color_mapping):
+    mapping_from_color2trainid = {}
+    for item in color_mapping["labels"]:
+        readable = item["readable"].lower()
+        if readable in labels:
+            color = item["color"]
+            mapping_from_color2trainid[tuple(color)]=labels[readable]
+    return mapping_from_color2trainid
+
+
+def rgb_to_object_id(rgb_value, mapping_from_color2trainid):
+    if tuple(rgb_value) in mapping_from_color2trainid:
+        return mapping_from_color2trainid[tuple(rgb_value)]
+    else:
+        return 255
+
+
+def convert_masks(input_folder, output_folder, mapping_from_color2trainid):
+    os.makedirs(output_folder, exist_ok=True)
+
+    for filename in tqdm(os.listdir(input_folder), desc="Processing files", unit="file"):
+        if filename.endswith(".png"):
+            image_path = os.path.join(input_folder, filename)
+            image = cv2.imread(image_path)
+            mask = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+            # Convert RGB values to object IDs
+            mask_object_ids = 255 * np.ones_like(mask[:, :, 0], dtype=np.uint8)
+
+            for rgb_value, obj_id in mapping_from_color2trainid.items():
+                rgb_value = list(rgb_value)
+                mask_object_ids[np.all(mask == rgb_value, axis=-1)] = obj_id
+
+            # Save the grayscale image
+            output_path = os.path.join(output_folder, filename)
+            cv2.imwrite(output_path, mask_object_ids)
+
+
+if __name__ == "__main__":
+    labels = {'road': 0,
+              'sidewalk': 1,
+              "building": 2,
+              "wall": 3,
+              "fence": 4,
+              "pole": 5,
+              "traffic light": 6,
+              "traffic sign": 7,
+              "vegetation": 8,
+              "terrain": 9,
+              "sky": 10,
+              "person": 11,
+              "rider": 12,
+              "car": 13,
+              "truck": 14,
+              "bus": 15,
+              "train": 16,
+              "motorcycle": 17,
+              "bicycle": 18}
+
+    json_path = "path/to/your/folder"
+    color_mapping = load_json(json_path)
+
+    mapping_from_color2trainid = convert_color_mapping(labels,color_mapping)
+
+
+    training_folder = "path/to/your/training/images/folder"
+    training_output_folder = "path/to/your/training/output/folder"
+    convert_masks(training_folder, training_output_folder, color_mapping)
+
+    validation_folder = "path/to/your/folder"
+    validation_output_folder = "path/to/your/folder"
+    convert_masks(validation_folder, validation_output_folder, mapping_from_color2trainid)
+
+    testing_folder = "path/to/your/folder"
+    testing_output_folder = "path/to/your/folder"
+    convert_masks(testing_folder, testing_output_folder, mapping_from_color2trainid)
+
