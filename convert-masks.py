@@ -70,7 +70,7 @@ if __name__ == "__main__":
               "motorcycle": 17,
               "bicycle": 18}
 
-    json_path = "path/to/your/folder"
+    json_path = "F:\data\cityscapesScripts-master\Mapillary-Vistas-1000-sidewalks\config.json"
     color_mapping = load_json(json_path)
 
     mapping_from_color2trainid = convert_color_mapping(labels,color_mapping)
@@ -78,13 +78,13 @@ if __name__ == "__main__":
 
     training_folder = "path/to/your/training/images/folder"
     training_output_folder = "path/to/your/training/output/folder"
-    convert_masks(training_folder, training_output_folder, color_mapping)
+    convert_masks(training_folder, training_output_folder, mapping_from_color2trainid)
 
-    validation_folder = "path/to/your/folder"
-    validation_output_folder = "path/to/your/folder"
+    validation_folder = "path/to/your/training/images/folder"
+    validation_output_folder = "path/to/your/training/images/folder"
     convert_masks(validation_folder, validation_output_folder, mapping_from_color2trainid)
 
-    testing_folder = "path/to/your/folder"
-    testing_output_folder = "path/to/your/folder"
+    testing_folder = "path/to/your/training/images/folder"
+    testing_output_folder = "path/to/your/training/images/folder"
     convert_masks(testing_folder, testing_output_folder, mapping_from_color2trainid)
 
