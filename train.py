@@ -16,10 +16,11 @@ import torch.optim as optim
 
 from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
 
-root = r'F:\data\cityscapesScripts-master'
+root = r'path\to\your\director'
 image_dir = r'leftImg8bit_trainvaltest\leftImg8bit\train'
 mask_dir = r'gtFine_trainvaltest\gtFine\train'
 checkpoints_dir = r'checkpoints\deeplab_model.pth'
+logger_dir = 'exp\\'
 
 
 transform = transforms.Compose([
@@ -40,7 +41,8 @@ class CustomDataset(Dataset):
         # TODO delete it
         city_list = random.sample(self.city_dir,3)
         current_date = str(date.today())
-        logger = get_logger('exp/' + 'exp_' + current_date + '.log')
+        logger_file = 'exp_' + current_date + '.log'
+        logger = get_logger(logger_dir,logger_file)
         logger.info(f'get model trained on city list [' + str(city_list) + ']')
         for city in city_list:
             city_img = os.path.join(self.img_dir,city)
@@ -69,7 +71,8 @@ class CustomDataset(Dataset):
 
 def train(model,data_loader,optimizer,criterion,hyper_params):
     current_date = str(date.today())
-    logger = get_logger('exp/' + 'exp_' + current_date + '.log')
+    logger_file = 'exp_' + current_date + '.log'
+    logger = get_logger(logger_dir,logger_file)
     process_id = os.getpid()
     logging.info(f'''Process-{process_id}  Starting training:
             Epochs:          {hyper_params["Epochs"]}
