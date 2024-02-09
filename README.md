@@ -41,7 +41,23 @@ Useful links for this project:
 python3 generate_video_walk.py files/walking_video.mp4 edited_video.mp4
 
 ### Edited Video Link:
+```
 https://faubox.rrze.uni-erlangen.de/getlink/fi2XDxAas5pd8tdh3Dvo8V/edited_video.mp4
 
+```
 ### link to trained weights:
+
+```
 https://faubox.rrze.uni-erlangen.de/getlink/fi2MMTuCQWKQygjac3pMQ3/deeplab_model.pth
+
+```
+### to run train.py file:
+```
+python3 tunetraining.py path/to/training/images path/to/training/labels path/to/validation/images path/to/validation/labels
+
+```
+### to run tunetraining.py file:
+```
+python3 tunetraining.py path/to/training/images path/to/training/labels path/to/validation/images path/to/validation/labels path/to/deeplab_model
+
+```
