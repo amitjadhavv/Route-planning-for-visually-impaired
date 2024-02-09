@@ -1,50 +1,35 @@
-import logging
 import os
-from torchvision import transforms
-from torch.utils.data import DataLoader, Dataset
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
 from PIL import Image
+import torch.nn as nn
+import torch.optim as optim
 import torch
 import torchvision.models as models
 import torchvision.models.segmentation as segmentation
-from utils import get_logger
-from datetime import date
-import torch.multiprocessing as mp
-import random
-
-import torch.nn as nn
-import torch.optim as optim
-
 from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
-
-root = r'path\to\your\director'
-image_dir = r'leftImg8bit_trainvaltest\leftImg8bit\train'
-mask_dir = r'gtFine_trainvaltest\gtFine\train'
-checkpoints_dir = r'checkpoints\deeplab_model.pth'
-logger_dir = 'exp\\'
+from tqdm import tqdm
+from datetime import date
+import sys
 
 
 transform = transforms.Compose([
     transforms.Resize((256,256)),
+    #transforms.Grayscale(num_output_channels=3),
     transforms.ToTensor(),
 ])
 
-class CustomDataset(Dataset):
+class CustomDataset(datasets.ImageFolder):
     def __init__(self, root,img_dir, mask_dir, transform=None):
         self.root = root
-        self.img_dir = os.path.join(root ,img_dir)
+        self.img_dir = os.path.join(root,img_dir)
         self.mask_dir = os.path.join(root,mask_dir)
         self.city_dir = os.listdir(self.img_dir)
         
         self.transform = transform
         self.images = []
         self.masks = []
-        # TODO delete it
-        city_list = random.sample(self.city_dir,3)
-        current_date = str(date.today())
-        logger_file = 'exp_' + current_date + '.log'
-        logger = get_logger(logger_dir,logger_file)
-        logger.info(f'get model trained on city list [' + str(city_list) + ']')
-        for city in city_list:
+        for city in self.city_dir:
             city_img = os.path.join(self.img_dir,city)
             city_mask = os.path.join(self.mask_dir,city)
             
@@ -53,12 +38,13 @@ class CustomDataset(Dataset):
                 mask_path = os.path.join(city_mask,file)
                 self.images.append(img_path)
                 self.masks.append(mask_path)
-
+                
     def __getitem__(self, index):
         img_path = self.images[index]
         mask_path = self.masks[index].replace('_leftImg8bit.png', '_gtFine_labelIds.png')
         image = Image.open(img_path).convert("RGB")
-        mask = Image.open(mask_path).convert("L") 
+        mask = Image.open(mask_path).convert("L")
+
         if self.transform is not None:
             image = self.transform(image)
             mask = self.transform(mask)
@@ -69,99 +55,75 @@ class CustomDataset(Dataset):
         return len(self.images)
 
 
-def train(model,data_loader,optimizer,criterion,hyper_params):
-    current_date = str(date.today())
-    logger_file = 'exp_' + current_date + '.log'
-    logger = get_logger(logger_dir,logger_file)
-    process_id = os.getpid()
-    logging.info(f'''Process-{process_id}  Starting training:
-            Epochs:          {hyper_params["Epochs"]}
-            Batch size:      {hyper_params["Batch_size"]}
-            Learning rate:   {hyper_params["Learning_rate"]}
-            Training size:   {hyper_params["Training_size"]}
-            Device:          {hyper_params["Device"]}
-            Loss type:       {hyper_params["Loss_type"]}
-            Backbone:        {hyper_params["Backbone"]}
-        ''')
-    for epoch in range(hyper_params["Epochs"]):
-        model.train()
-        for batch_i, batch in enumerate(data_loader):
-            images = batch['image']
-            masks = batch['mask']
-            images, masks = images.to(hyper_params["Device"]), masks.to(hyper_params["Device"])
-            optimizer.zero_grad()
-            outputs = model(images)
+root = ''
+image_dir = sys.argv[1] #'/kaggle/input/images/leftImg8bit_trainvaltest/leftImg8bit/train' 
+mask_dir = sys.argv[2] #'/kaggle/input/image-segmentation/gtFine_trainvaltest/gtFine/train'
 
+val_img = sys.argv[3] #"/kaggle/input/images/leftImg8bit_trainvaltest/leftImg8bit/val"
+val_mask = sys.argv[4] #"/kaggle/input/image-segmentation/gtFine_trainvaltest/gtFine/val"
+
+dataset = CustomDataset(root,image_dir, mask_dir, transform)
+data_loader = DataLoader(dataset, batch_size=16, shuffle=True)
+valdata = CustomDataset(root,val_img,val_mask,transform)
+valloader = DataLoader(valdata,batch_size=16,shuffle=True)
+
+
+
+# Load pre-trained ResNet-34
+resnet34 = models.resnet34(pretrained=True)
+
+# Create a DeepLabv3+ model with ResNet-34 as the backbone
+deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=19,backbone=resnet34)
+
+
+#os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.cuda.empty_cache()
+
+num_classes = 19
+#batch_size = 5
+learning_rate = 0.0001
+num_epochs = 50
+
+criterion = IoULoss(num_classes = 19).to(device)#nn.CrossEntropyLoss()
+optimizer = optim.Adam(deeplab_model.parameters(), lr=learning_rate)
+
+#scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
+
+deeplab_model = deeplab_model.to(device)
+
+
+best_val_loss = float('inf')
+# Training loop
+for epoch in tqdm(range(num_epochs)):
+    deeplab_model.train()
+    for batch in data_loader:
+        images = batch['image']
+        masks = batch['mask']
+        images, masks = images.to(device), masks.to(device)
+        optimizer.zero_grad()
+        outputs = deeplab_model(images)
+        masks = masks.squeeze(1)
+        masks = masks.long()
+        loss = criterion(outputs['out'], masks)
+        loss.requires_grad = True
+        loss.backward()
+        optimizer.step()
+    
+    deeplab_model.eval()
+    total_loss = 0.0
+    with torch.no_grad():
+        for val_batch in valloader:
+            val_images = val_batch['image'].to(device)
+            masks = val_batch['mask'].to(device)
+            outputs = deeplab_model(val_images)
             masks = masks.squeeze(1)
             masks = masks.long()
-
             loss = criterion(outputs['out'], masks)
-            loss.requires_grad = True
-            loss.backward()
-            optimizer.step()
-            logger.info(f'Process-{process_id} Epoch [{epoch + 1}/{hyper_params["Epochs"]}],Batch_i: {batch_i} Loss: {loss.item()}')
-
-
-
-if __name__ == '__main__':
-
-    batch_size = 8
-    num_classes = 19
-    learning_rate = 0.001
-    num_epochs = 10
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    loss_type = 'IoU'
-    backbone = 'resnet50'
-    load_checkpoints = False
-
-    dataset = CustomDataset(root, image_dir, mask_dir, transform)
-    train_size = len(dataset)
-    data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True,num_workers=4)
-
-
-
-    # Load pre-trained ResNet-34
-    resnet34 = models.resnet34(pretrained=True)
-
-    # Create a DeepLabv3+ model with ResNet-34 as the backbone
-    deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=19)
-    if load_checkpoints:
-        deeplab_model.load_state_dict(torch.load(checkpoints_dir))
-    deeplab_model.share_memory()
-
-
-
-    torch.cuda.empty_cache()
-    cuda0 = torch.device('cuda:0')
-    cuda1 = torch.device('cuda:1')
-
-
-
-    criterion = IoULoss(num_classes = 19).to(device)
-
-    optimizer = optim.Adam(deeplab_model.parameters(), lr=learning_rate)
-
-
-    deeplab_model = deeplab_model.to(device)
-
-
-
-    hyper_params = {
-        "Epochs": num_epochs,
-        "Batch_size":      batch_size,
-        "Learning_rate": learning_rate,
-        "Training_size": train_size,
-        "Device": device,
-        "Loss_type": loss_type,
-        "Backbone": backbone,
-    }
-
-    processes = []
-    num_processes = 2
-    for i in range(num_processes):  # No. of processes
-        p = mp.Process(target=train, args=(deeplab_model,data_loader,optimizer,criterion,hyper_params))
-        p.start()
-        processes.append(p)
-    for p in processes:
-        p.join()
-    torch.save(deeplab_model.state_dict(), 'deeplab_model.pth')
+            total_loss += loss.item() * images.size(0)
+        avg_val_loss = total_loss / len(valloader.dataset)
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            print(f'Saving the model at Epoch [{epoch + 1}/{num_epochs}]')
+            torch.save(deeplab_model.state_dict(), 'deeplab_model.pth')
+        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item()}, Val Loss: {avg_val_loss}')
