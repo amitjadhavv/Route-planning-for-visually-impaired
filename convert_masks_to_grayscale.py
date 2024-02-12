@@ -38,7 +38,7 @@ def convert_masks(input_folder, output_folder, mapping_from_color2trainid):
             mask = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
             # Convert RGB values to object IDs
-            mask_object_ids = 255 * np.ones_like(mask[:, :, 0], dtype=np.uint8)
+            mask_object_ids = np.zeros_like(mask[:, :, 0], dtype=np.uint8)
 
             for rgb_value, obj_id in mapping_from_color2trainid.items():
                 rgb_value = list(rgb_value)
@@ -50,25 +50,14 @@ def convert_masks(input_folder, output_folder, mapping_from_color2trainid):
 
 
 if __name__ == "__main__":
-    labels = {'road': 0,
-              'sidewalk': 1,
-              "building": 2,
-              "wall": 3,
-              "fence": 4,
-              "pole": 5,
-              "traffic light": 6,
-              "traffic sign": 7,
-              "vegetation": 8,
-              "terrain": 9,
-              "sky": 10,
-              "person": 11,
-              "rider": 12,
-              "car": 13,
-              "truck": 14,
-              "bus": 15,
-              "train": 16,
-              "motorcycle": 17,
-              "bicycle": 18}
+    labels = { 'unlabeled': 0,
+    		'road': 7,
+              'sidewalk':8 ,
+              "traffic light": 19,
+              "traffic sign": 20,
+              "person": 24,
+              "car": 26,
+              "bicycle":33}
 
     json_path = "F:\data\cityscapesScripts-master\Mapillary-Vistas-1000-sidewalks\config.json"
     color_mapping = load_json(json_path)

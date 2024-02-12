@@ -11,10 +11,13 @@ from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
 from tqdm import tqdm
 from datetime import date
 import sys
+import numpy as np
 
+labels = [0,7,8,19,20,24,26,33]
+nolabels = [x for x in range(-1,34) if x not in labels]
 
 transform = transforms.Compose([
-    transforms.Resize((256,256)),
+    transforms.Resize((512,256)),
     #transforms.Grayscale(num_output_channels=3),
     transforms.ToTensor(),
 ])
@@ -44,7 +47,10 @@ class CustomDataset(datasets.ImageFolder):
         mask_path = self.masks[index].replace('_leftImg8bit.png', '_gtFine_labelIds.png')
         image = Image.open(img_path).convert("RGB")
         mask = Image.open(mask_path).convert("L")
-
+        mask = np.array(mask)
+	for i in nolabels:
+    	    mask[mask == i] = 0
+	mask = Image.fromarray(mask)
         if self.transform is not None:
             image = self.transform(image)
             mask = self.transform(mask)
@@ -63,9 +69,9 @@ val_img = sys.argv[3] #"/kaggle/input/images/leftImg8bit_trainvaltest/leftImg8bi
 val_mask = sys.argv[4] #"/kaggle/input/image-segmentation/gtFine_trainvaltest/gtFine/val"
 
 dataset = CustomDataset(root,image_dir, mask_dir, transform)
-data_loader = DataLoader(dataset, batch_size=16, shuffle=True)
+data_loader = DataLoader(dataset, batch_size=8, shuffle=True)
 valdata = CustomDataset(root,val_img,val_mask,transform)
-valloader = DataLoader(valdata,batch_size=16,shuffle=True)
+valloader = DataLoader(valdata,batch_size=8,shuffle=True)
 
 
 
@@ -73,19 +79,19 @@ valloader = DataLoader(valdata,batch_size=16,shuffle=True)
 resnet34 = models.resnet34(pretrained=True)
 
 # Create a DeepLabv3+ model with ResNet-34 as the backbone
-deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=19,backbone=resnet34)
+deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8,backbone=resnet34)
 
 
 #os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.cuda.empty_cache()
 
-num_classes = 19
+num_classes = 8
 #batch_size = 5
 learning_rate = 0.0001
-num_epochs = 50
+num_epochs = 40
 
-criterion = IoULoss(num_classes = 19).to(device)#nn.CrossEntropyLoss()
+criterion = IoULoss(num_classes = num_classes).to(device)#nn.CrossEntropyLoss()
 optimizer = optim.Adam(deeplab_model.parameters(), lr=learning_rate)
 
 #scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)

@@ -14,7 +14,7 @@ from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
 import sys
 
 transform = transforms.Compose([
-    transforms.Resize((256,256)),
+    transforms.Resize((512,256)),
     transforms.ToTensor(),
 ])
 
@@ -56,18 +56,17 @@ mask_dir = sys.argv[2] #'/kaggle/working/output'
 val_img = sys.argv[3] #"/kaggle/input/mapillary/Mapillary-Vistas-1000-sidewalks/validation/images"
 val_mask = sys.argv[4] #"/kaggle/working/val"
 valdata = CustomDataset(root,val_img,val_mask,transform)
-valloader = DataLoader(valdata,batch_size=16,shuffle=True)
+valloader = DataLoader(valdata,batch_size=8,shuffle=True)
 
-model_path = sys.argv[5]
+model_path = sys.argv[5] 
 
 dataset = CustomDataset(root,image_dir, mask_dir, transform)
-data_loader = DataLoader(dataset, batch_size=16, shuffle=True)
+data_loader = DataLoader(dataset, batch_size=8, shuffle=True)
 
 resnet34 = models.resnet34(pretrained=True)
 # Create a DeepLabv3+ model with ResNet-34 as the backbone
-deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=19,backbone=resnet34)
-#deeplab_model.load_state_dict(torch.load(model_path))
-
+deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8,backbone=resnet34)
+deeplab_model.load_state_dict(torch.load(model_path)) #load model trained on cityscape
 
 import torch.nn as nn
 import torch.optim as optim
@@ -80,12 +79,12 @@ from tqdm import tqdm
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.cuda.empty_cache()
 
-num_classes = 19
+num_classes = 8
 #batch_size = 5
 learning_rate = 0.0001
-num_epochs = 20
+num_epochs = 30
 
-criterion = IoULoss(num_classes = 19).to(device)#nn.CrossEntropyLoss()
+criterion = IoULoss(num_classes = num_classes).to(device)#nn.CrossEntropyLoss()
 optimizer = optim.Adam(deeplab_model.parameters(), lr=learning_rate)
 
 deeplab_model = deeplab_model.to(device)

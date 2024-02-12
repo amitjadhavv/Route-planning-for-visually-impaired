@@ -5,6 +5,7 @@ from PIL import Image
 import torch
 import torchvision.models.segmentation as segmentation
 import numpy as np
+import sys
 
 model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=30)
 
@@ -13,7 +14,7 @@ model.load_state_dict(torch.load("deeplab_model.pth"))
 model.eval()
 
 transform = transforms.Compose([
-    transforms.Resize((256,256)),
+    transforms.Resize((512,256)),
     transforms.ToTensor(),
 ])
 
@@ -23,8 +24,9 @@ def preprocess_image(image_path):
     return image
 import os
 
-test_images_folder = '/mapillary/Mapillary-Vistas-1000-sidewalks/testing/images' # please edit to correct location of the mapilary dataset since we have not uploded the data set
-output_folder = '/masks'
+test_images_folder = sys.argv[1] #'/mapillary/Mapillary-Vistas-1000-sidewalks/testing/images' # please edit to correct location of the mapilary dataset since we have not uploded the data set
+ground_truth_folder = sys.argv[2] #'/mapillary/Mapillary-Vistas-1000-sidewalks/testing/labels'
+output_folder = sys.argv[3] #'/masks'
 
 os.makedirs(output_folder, exist_ok=True)
 
@@ -62,7 +64,6 @@ def compute_iou(predicted_mask_path, ground_truth_mask_path):
 
 def evaluate_model(predictions_folder, ground_truth_folder):
     predicted_files = os.listdir(predictions_folder)
-
     total_iou = 0
     total_images = len(predicted_files)
 
@@ -76,8 +77,5 @@ def evaluate_model(predictions_folder, ground_truth_folder):
     average_iou = total_iou / total_images
     return average_iou
 
-predictions_folder = '/masks'
-ground_truth_folder = '/mapillary/Mapillary-Vistas-1000-sidewalks/testing/labels'
-
-iou = evaluate_model(predictions_folder, ground_truth_folder)
+iou = evaluate_model(output_folder, ground_truth_folder)
 print(f"Average IoU: {iou}")
