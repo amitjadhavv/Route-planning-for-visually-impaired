@@ -13,6 +13,7 @@ import torch.optim as optim
 from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
 import sys
 
+
 transform = transforms.Compose([
     transforms.Resize((512,256)),
     transforms.ToTensor(),
@@ -65,14 +66,9 @@ data_loader = DataLoader(dataset, batch_size=8, shuffle=True)
 
 resnet34 = models.resnet34(pretrained=True)
 # Create a DeepLabv3+ model with ResNet-34 as the backbone
-deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8,backbone=resnet34)
+deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8)
 deeplab_model.load_state_dict(torch.load(model_path)) #load model trained on cityscape
 
-import torch.nn as nn
-import torch.optim as optim
-
-from torchmetrics.classification import MulticlassJaccardIndex as IoULoss
-from tqdm import tqdm
 
 #os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
 

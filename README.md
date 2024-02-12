@@ -62,3 +62,7 @@ python3 training_pipeline.py path/to/training/images path/to/training/labels pat
 python3 inference.py path/to/test/images path/to/test/ground/truth/labels path/to/model/output /path/to/deeplab_model
 
 ```
+### to run convert_masks_to_grayscale.py file:
+```
+python3 convert_masks_to_grayscale.py /path/to/config.json /path/to/training/labels /path/to/output/training/labels path/to/validation/labels /path/to/output/validation/labels /path/to/testing/labels /path/output/testing/labels
+```

@@ -6,7 +6,7 @@ import torch
 import torchvision.models.segmentation as segmentation
 import numpy as np
 import sys
-
+from tqdm import tqdm
 model_path = sys.argv[4]
 
 model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8)
@@ -69,7 +69,7 @@ def evaluate_model(predictions_folder, ground_truth_folder):
     total_iou = 0
     total_images = len(predicted_files)
 
-    for file in predicted_files:
+    for file in tqdm(predicted_files):
         predicted_mask_path = os.path.join(predictions_folder, file)
         ground_truth_mask_path = os.path.join(ground_truth_folder, file.replace(".jpg_predicted_mask.png",".png"))
 

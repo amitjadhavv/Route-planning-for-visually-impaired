@@ -3,7 +3,7 @@ import json
 import cv2
 import numpy as np
 from tqdm import tqdm
-
+import sys
 
 def load_json(json_path):
     with open(json_path, 'r') as f:
@@ -50,30 +50,30 @@ def convert_masks(input_folder, output_folder, mapping_from_color2trainid):
 
 
 if __name__ == "__main__":
-    labels = { 'unlabeled': 0,
-    		'road': 7,
-              'sidewalk':8 ,
+    labels = {"unlabeled": 0,
+    	      "road": 7,
+              "sidewalk":8 ,
               "traffic light": 19,
               "traffic sign": 20,
               "person": 24,
               "car": 26,
               "bicycle":33}
 
-    json_path = "F:\data\cityscapesScripts-master\Mapillary-Vistas-1000-sidewalks\config.json"
+    json_path = sys.argv[1] #"F:\data\cityscapesScripts-master\Mapillary-Vistas-1000-sidewalks\config.json"
     color_mapping = load_json(json_path)
 
     mapping_from_color2trainid = convert_color_mapping(labels,color_mapping)
 
 
-    training_folder = "path/to/your/training/images/folder"
-    training_output_folder = "path/to/your/training/output/folder"
+    training_folder = sys.argv[2] #"path/to/your/training/images/folder"
+    training_output_folder = sys.argv[3] #"path/to/your/training/output/folder"
     convert_masks(training_folder, training_output_folder, mapping_from_color2trainid)
 
-    validation_folder = "path/to/your/training/images/folder"
-    validation_output_folder = "path/to/your/training/images/folder"
+    validation_folder = sys.argv[4] #"path/to/your/training/images/folder"
+    validation_output_folder = sys.argv[5] #"path/to/your/training/images/folder"
     convert_masks(validation_folder, validation_output_folder, mapping_from_color2trainid)
 
-    testing_folder = "path/to/your/training/images/folder"
-    testing_output_folder = "path/to/your/training/images/folder"
+    testing_folder = sys.argv[6] #"path/to/your/training/images/folder"
+    testing_output_folder = sys.argv[7] #"path/to/your/training/images/folder"
     convert_masks(testing_folder, testing_output_folder, mapping_from_color2trainid)
 

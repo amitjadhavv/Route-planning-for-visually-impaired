@@ -79,7 +79,7 @@ valloader = DataLoader(valdata,batch_size=8,shuffle=True)
 resnet34 = models.resnet34(pretrained=True)
 
 # Create a DeepLabv3+ model with ResNet-34 as the backbone
-deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8,backbone=resnet34)
+deeplab_model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8)
 
 
 #os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
