@@ -7,9 +7,11 @@ import torchvision.models.segmentation as segmentation
 import numpy as np
 import sys
 
-model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=30)
+model_path = sys.argv[4]
 
-model.load_state_dict(torch.load("deeplab_model.pth"))
+model = segmentation.deeplabv3_resnet50(pretrained=False, num_classes=8)
+
+model.load_state_dict(torch.load(model_path))
 
 model.eval()
 

@@ -51,8 +51,14 @@ https://faubox.rrze.uni-erlangen.de/getlink/fi2MMTuCQWKQygjac3pMQ3/deeplab_model
 python3 tunetraining.py path/to/training/images path/to/training/labels path/to/validation/images path/to/validation/labels
 
 ```
-### to run tunetraining.py file:
+### to run train_pipeline.py file:
 ```
-python3 tunetraining.py path/to/training/images path/to/training/labels path/to/validation/images path/to/validation/labels path/to/deeplab_model
+python3 train_pipeline.py path/to/training/images path/to/training/labels path/to/validation/images path/to/validation/labels path/to/deeplab_model
+
+```
+
+### to run inference.py file:
+```
+python3 inference.py path/to/test/images path/to/test/ground/truth/labels path/to/model/output /path/to/deeplab_model
 
 ```
