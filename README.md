@@ -44,7 +44,7 @@ python3 generate_video_walk.py files/walking_video.mp4 edited_video.mp4
 https://faubox.rrze.uni-erlangen.de/getlink/fi2XDxAas5pd8tdh3Dvo8V/edited_video.mp4
 
 ### link to trained weights:
-https://faubox.rrze.uni-erlangen.de/getlink/fi2MMTuCQWKQygjac3pMQ3/deeplab_model.pth
+https://faubox.rrze.uni-erlangen.de/getlink/fi5c3Djey6vDFuYs4AQZGi/deeplab_model.pth
 
 ### to run train.py file:
 ```
