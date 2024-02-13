@@ -48,18 +48,18 @@ https://faubox.rrze.uni-erlangen.de/getlink/fi5c3Djey6vDFuYs4AQZGi/deeplab_model
 
 ### to run train.py file:
 ```
-python3 train.py path/to/training/images path/to/training/labels path/to/validation/images path/to/validation/labels
+python3 train.py /path/to/training/images /path/to/training/labels /path/to/validation/images /path/to/validation/labels
 
 ```
 ### to run training_pipeline.py file:
 ```
-python3 training_pipeline.py path/to/training/images path/to/training/labels path/to/validation/images path/to/validation/labels path/to/deeplab_model
+python3 training_pipeline.py /path/to/training/images /path/to/training/labels /path/to/validation/images /path/to/validation/labels /path/to/deeplab_model
 
 ```
 
 ### to run inference.py file:
 ```
-python3 inference.py path/to/test/images path/to/test/ground/truth/labels path/to/model/output /path/to/deeplab_model
+python3 inference.py /path/to/test/mapillary/images /path/to/test/mapillary/ground/truth/labels /path/to/model/output /path/to/deeplab_model
 
 ```
 ### to run convert_masks_to_grayscale.py file:
