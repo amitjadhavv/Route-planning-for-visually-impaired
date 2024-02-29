@@ -2,9 +2,9 @@ import json
 import tools
 from collections import deque
 import xmltodict
-from myscripts import route
-from myscripts import trace_route
-from myscripts import trace_attributes
+from myroutes import route
+from myroutes import trace_route
+from myroutes import trace_attributes
 import sys
 from moviepy.editor import *
 from moviepy.video.tools.subtitles import SubtitlesClip
