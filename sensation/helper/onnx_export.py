@@ -19,7 +19,7 @@ def export_to_onnx(pytorch_model_path, onnx_model_path):
 
     # Adjust the dummy input to match the model's expected input size
     dummy_input = torch.randn(
-        1, 3, 256, 512
+        1, 3, 256, 256
     )  # Adjusted for an image of height 256 and width 512
 
     # Export the model
@@ -44,13 +44,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--pytorch",
         type=str,
-        default="model.pth",
+        default="../../deeplab_model_final.pth",
         help="Path to the PyTorch model file",
     )
     parser.add_argument(
         "--onnx",
         type=str,
-        default="model.onnx",
+        default="onnxmodel.onnx",
         help="Path where the ONNX model will be stored",
     )
 
