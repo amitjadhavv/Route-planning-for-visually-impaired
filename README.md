@@ -73,6 +73,6 @@ python3 convert_masks_to_grayscale.py /path/to/config.json /path/to/training/lab
 
 ### to run rsu_vi.py file:
 ```
-python3 rsu.py /path/to/input/video /path/to/gpx/file /path/to/output/video
+python3 rsu_vi.py /path/to/input/video /path/to/gpx/file /path/to/output/video
 
 ```
