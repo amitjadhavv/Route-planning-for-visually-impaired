@@ -37,9 +37,6 @@ Useful links for this project:
 1. install imagemagic. check <https://zulko.github.io/moviepy/install.html>
 2. pip install -r requirements.txt
 
-### To run the generate_video_walk file:
-python3 generate_video_walk.py files/walking_video.mp4 edited_video.mp4
-
 ### Edited Video Link:
 https://faubox.rrze.uni-erlangen.de/getlink/fi2XDxAas5pd8tdh3Dvo8V/edited_video.mp4
 
@@ -48,6 +45,12 @@ https://faubox.rrze.uni-erlangen.de/getlink/fi8Gr2BJugqAZDfF8LPjvi/deeplab_model
 
 ### link to test video:
 https://faubox.rrze.uni-erlangen.de/getlink/fi66Ra3Se2zFQg73kbNc7v/testvdo.mp4
+
+### To run the generate_video_walk file:
+```
+python3 generate_video_walk.py files/walking_video.mp4 edited_video.mp4
+
+```
 
 ### to run train.py file:
 ```
@@ -73,6 +76,6 @@ python3 convert_masks_to_grayscale.py /path/to/config.json /path/to/training/lab
 
 ### to run rsu_vi.py file:
 ```
-python3 rsu_vi.py /path/to/input/video /path/to/gpx/file /path/to/output/video
+python3 rsu_vi.py /path/to/test/input/video.mp4 /path/to/testgps.gpx/file /path/to/output/video.mp4
 
 ```
