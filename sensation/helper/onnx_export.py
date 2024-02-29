@@ -44,13 +44,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--pytorch",
         type=str,
-        default="../../deeplab_model_final.pth",
+        default="/home/amit/Downloads/deeplab_model_final.pth",
         help="Path to the PyTorch model file",
     )
     parser.add_argument(
         "--onnx",
         type=str,
-        default="onnxmodel.onnx",
+        default="/home/amit/route-planning-for-the-visually-impaired/model_weights/deeplabv3resnet50.onnx",
         help="Path where the ONNX model will be stored",
     )
 
