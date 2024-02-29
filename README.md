@@ -46,6 +46,9 @@ https://faubox.rrze.uni-erlangen.de/getlink/fi2XDxAas5pd8tdh3Dvo8V/edited_video.
 ### link to trained weights:
 https://faubox.rrze.uni-erlangen.de/getlink/fi8Gr2BJugqAZDfF8LPjvi/deeplab_model_final.pth
 
+### link to test video:
+https://faubox.rrze.uni-erlangen.de/getlink/fi66Ra3Se2zFQg73kbNc7v/testvdo.mp4
+
 ### to run train.py file:
 ```
 python3 train.py /path/to/training/images /path/to/training/labels /path/to/validation/images /path/to/validation/labels
@@ -65,4 +68,11 @@ python3 inference.py /path/to/test/mapillary/images /path/to/test/mapillary/grou
 ### to run convert_masks_to_grayscale.py file:
 ```
 python3 convert_masks_to_grayscale.py /path/to/config.json /path/to/training/labels /path/to/output/training/labels path/to/validation/labels /path/to/output/validation/labels /path/to/testing/labels /path/output/testing/labels
+
+```
+
+### to run rsu_vi.py file:
+```
+python3 rsu.py /path/to/input/video /path/to/gpx/file /path/to/output/video
+
 ```
