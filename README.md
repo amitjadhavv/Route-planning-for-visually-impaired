@@ -1,24 +1,38 @@
-In the initiative entitled "Road Scene Understanding for the Visually Impaired", our research team is meticulously advancing the development of the Sidewalk Environment Detection System for Assistive NavigaTION (hereinafter referred to as SENSATION). The primary objective of this venture is to enhance the mobility capabilities of blind or visually impaired persons (BVIPs) by ensuring safer and more efficient navigation on pedestrian pathways.
-For the implementation phase, a specialized apparatus has been engineered: a chest-mounted bag equipped with an NVIDIA Jetson Nano, serving as the core computational unit. This device integrates a plethora of sensors including, but not limited to, tactile feedback mechanisms (vibration motors) for direction indication, optical sensors (webcam) for environmental data acquisition, wireless communication modules (Wi-Fi antenna) for internet connectivity, and geospatial positioning units (GPS sensors) for real-time location tracking.
-Despite the promising preliminary design of the prototype, several technical challenges persist that warrant investigation.
-The "Road Scene Understanding for the Visually Impaired" initiative is actively seeking student collaborators to refine the Jetson Nano-fueled SENSATION system. Through the combination of GPS systems and cutting-edge image segmentation techniques refined for sidewalk recognition, participating teams are expected to architect an application tailored to aid BVIPs in traversing urban landscapes, seamlessly guiding them from a designated starting point to a predetermined destination.
-The developmental framework for this endeavor is based on the Python programming language; hence, prior experience with Python will be an advantage.
-For the purposes of real-world testing and calibration, the navigation part will start at the main train station in Erlangen and end at the University Library of Erlangen-Nuremberg (Schuhstrasse 1a).
-Technical milestones that must be completed in this project include:
-Algorithmic generation of navigational pathways in Python, depending on defined start and endpoint parameters.
-Real-time geospatial tracking to determine the immediate coordinates of the BVIP.
-Optical recording of the current coordinates and subsequent algorithmic evaluation to check the orientation of the sidewalk.
-Useful links for this project:
-1. Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation, https://link.springer.com/chapter/10.1007/978-3-030-01234-2_49
-2. How to connect an USB GPS receiver with a Linux computer?, https://gpswebshop.com/blogs/tech-support-by-os-linux/how-to-connect-an-usb-gps-receiver-with-a-linux-computer
-3. Open Streetmap, https://www.openstreetmap.de/
-4. GeoPy documentation, https://geopy.readthedocs.io/en/stable/
-5. Efficient Localisation Using Images and OpenStreetMaps, http://www.ipb.uni-bonn.de/pdfs/zhou2021iros.pdf
-6. A Practical Guide to an Open-Source Map-Matching Approach for Big GPS Data, https://link.springer.com/article/10.1007/s42979-022-01340-5
-7. VALHALLA Map Matching service API reference, https://valhalla.github.io/valhalla/api/map-matching/api-reference/
-8. L2MM: Learning to Map Matching with Deep Models for Low-Quality GPS Trajectory Data, https://dl.acm.org/doi/10.1145/3550486
+# Route Planning for the Visually Impaired (SENSATION)
 
-### To install required libraries:
+**Master's seminar project, FAU Erlangen-Nürnberg (Winter 2023/24)** · Team: Anubhav Singh, Amit Jadhav, Zhipeng Peng
+
+Part of the research initiative *Road Scene Understanding for the Visually Impaired*, which develops **SENSATION** (Sidewalk Environment Detection System for Assistive NavigaTION): a chest-mounted NVIDIA Jetson Nano with webcam, GPS and vibration motors that guides blind and visually impaired pedestrians (BVIPs). The real-world test route runs from Erlangen main station to the University Library.
+
+Our group built the software that combines **GPS route planning** with **sidewalk segmentation** and turns them into spoken-style navigation commands.
+
+## What we built
+
+```mermaid
+flowchart LR
+    G[GPS trace<br/>.gpx] -->|Valhalla Map Matching<br/>trace_route| I[Turn-by-turn<br/>instructions]
+    G --> W[Walk simulator<br/>haversine distance]
+    I --> W
+    V[Walking video] -->|frame every 3 s| S[DeepLabV3-ResNet50<br/>sidewalk segmentation]
+    S --> C[Sidewalk position<br/>→ steering command]
+    W --> O[Subtitled video walk<br/>MoviePy + ImageMagick]
+    C --> O
+```
+
+- **Route planning** (`myroutes/`, `main.py`, `request.py`): Valhalla Map Matching API (`route`, `trace_route`, `trace_attributes`) snaps GPS coordinates to the pedestrian network and returns narrative turn instructions. A walk simulator replays the GPS trace and fires each instruction when the walked distance reaches the next manoeuvre.
+- **Sidewalk segmentation** (`train.py`, `training_pipeline.py`, `sensation/`): DeepLabV3 with a ResNet-50 backbone (ImageNet-pretrained, ASPP), trained on Cityscapes remapped to 8 classes, 256×256 input, Adam (lr 1e-4, weight decay 1e-5), **weighted cross-entropy** to handle the heavy class imbalance, 50 epochs, batch size 32.
+- **Evaluation** (`inference.py`, `compute_IOU.py`): tested on Mapillary images, **IoU 0.55** on unseen data (validation loss 0.048).
+- **Video walk demo** (`generate_video_walk.py`, `rsu_vi.py`): runs segmentation on the walking video every 3 seconds, derives a direction command from where the sidewalk is, and overlays both the route instructions and the sidewalk commands as subtitles.
+
+**Stack:** Python · PyTorch · torchvision (DeepLabV3) · Valhalla API · GPX/geospatial processing · OpenCV · MoviePy · ONNX export
+
+## Challenges and next steps
+
+GPU access was the main constraint: we trained on online GPUs with reduced batch size, image size and epochs. Next steps we identified: other backbones (ResNet-101, MobileNetV3), training on Mapillary, longer training, and Dice / focal / Jaccard losses.
+
+## Setup and usage
+
+### Install
 #### for linux:
 1. sudo apt-get install imagemagick
 2. pip install -r requirements.txt
